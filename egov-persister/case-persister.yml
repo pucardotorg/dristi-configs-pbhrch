@@ -232,7 +232,7 @@ serviceMaps:
               type: JSON
               dbType: JSONB
 
-        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,firstName,middleName,lastName,fullName,mobileNumber,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,firstName,middleName,lastName,fullName,mobileNumber,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
           basePath: cases.poaHolders.*
           jsonMaps:
             - jsonPath: $.cases.poaHolders.*.id
@@ -549,7 +549,7 @@ serviceMaps:
             is_active,additional_details,hasSigned,representing_litigants,
             created_by,last_modified_by,created_time,last_modified_time,
             firstName,middleName,lastName,fullName,mobileNumber,age,address
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT (id) DO UPDATE SET
             tenant_id = EXCLUDED.tenant_id,
             case_id = EXCLUDED.case_id,
