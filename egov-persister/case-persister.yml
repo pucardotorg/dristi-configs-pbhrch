@@ -232,7 +232,7 @@ serviceMaps:
               type: JSON
               dbType: JSONB
 
-        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,firstName,middleName,lastName,fullName,mobileNumber,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
           basePath: cases.poaHolders.*
           jsonMaps:
             - jsonPath: $.cases.poaHolders.*.id
@@ -240,7 +240,6 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.caseId
             - jsonPath: $.cases.poaHolders.*.individualId
             - jsonPath: $.cases.poaHolders.*.poaType
-            - jsonPath: $.cases.poaHolders.*.name
             - jsonPath: $.cases.poaHolders.*.isActive
             - jsonPath: $.cases.poaHolders.*.additionalDetails
               type: JSON
@@ -253,6 +252,15 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedBy
             - jsonPath: $.cases.poaHolders.*.auditDetails.createdTime
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedTime
+            - jsonPath: $.cases.poaHolders.*.firstName
+            - jsonPath: $.cases.poaHolders.*.middleName
+            - jsonPath: $.cases.poaHolders.*.lastName
+            - jsonPath: $.cases.poaHolders.*.fullName
+            - jsonPath: $.cases.poaHolders.*.mobileNumber
+            - jsonPath: $.cases.poaHolders.*.age
+            - jsonPath: $.cases.poaHolders.*.address
+              type: JSON
+              dbType: JSONB
 
         - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType, isActive,poaholder_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?);
           basePath: cases.poaHolders.*.documents.*
@@ -536,12 +544,17 @@ serviceMaps:
               dbType: JSONB
 
         - query:
-            INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) do update set
+            INSERT INTO dristi_case_poaholders(
+            id,tenant_id,case_id,individual_id,poa_type,
+            is_active,additional_details,hasSigned,representing_litigants,
+            created_by,last_modified_by,created_time,last_modified_time,
+            firstName,middleName,lastName,fullName,mobileNumber,age,address
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT (id) DO UPDATE SET
             tenant_id = EXCLUDED.tenant_id,
             case_id = EXCLUDED.case_id,
             individual_id = EXCLUDED.individual_id,
             poa_type = EXCLUDED.poa_type,
-            name = EXCLUDED.name,
             is_active = EXCLUDED.is_active,
             additional_details = EXCLUDED.additional_details,
             hasSigned = EXCLUDED.hasSigned,
@@ -549,7 +562,14 @@ serviceMaps:
             created_by = EXCLUDED.created_by,
             last_modified_by = EXCLUDED.last_modified_by,
             created_time = EXCLUDED.created_time,
-            last_modified_time = EXCLUDED.last_modified_time;
+            last_modified_time = EXCLUDED.last_modified_time,
+            firstName = EXCLUDED.firstName,
+            middleName = EXCLUDED.middleName,
+            lastName = EXCLUDED.lastName,
+            fullName = EXCLUDED.fullName,
+            mobileNumber = EXCLUDED.mobileNumber,
+            age = EXCLUDED.age,
+            address = EXCLUDED.address;
           basePath: cases.poaHolders.*
           jsonMaps:
             - jsonPath: $.cases.poaHolders.*.id
@@ -557,7 +577,6 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.caseId
             - jsonPath: $.cases.poaHolders.*.individualId
             - jsonPath: $.cases.poaHolders.*.poaType
-            - jsonPath: $.cases.poaHolders.*.name
             - jsonPath: $.cases.poaHolders.*.isActive
             - jsonPath: $.cases.poaHolders.*.additionalDetails
               type: JSON
@@ -570,6 +589,15 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedBy
             - jsonPath: $.cases.poaHolders.*.auditDetails.createdTime
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedTime
+            - jsonPath: $.cases.poaHolders.*.firstName
+            - jsonPath: $.cases.poaHolders.*.middleName
+            - jsonPath: $.cases.poaHolders.*.lastName
+            - jsonPath: $.cases.poaHolders.*.fullName
+            - jsonPath: $.cases.poaHolders.*.mobileNumber
+            - jsonPath: $.cases.poaHolders.*.age
+            - jsonPath: $.cases.poaHolders.*.address
+              type: JSON
+              dbType: JSONB
 
         - query:
             INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, poaholder_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) do update set
@@ -1010,12 +1038,11 @@ serviceMaps:
       auditAttributeBasePath: poaHolders
       queryMaps:
         - query:
-            INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) do update set
+            INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,firstName,middleName,lastName,fullName,mobileNumber,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) do update set
             tenant_id = EXCLUDED.tenant_id,
             case_id = EXCLUDED.case_id,
             individual_id = EXCLUDED.individual_id,
             poa_type = EXCLUDED.poa_type,
-            name = EXCLUDED.name,
             is_active = EXCLUDED.is_active,
             additional_details = EXCLUDED.additional_details,
             hasSigned = EXCLUDED.hasSigned,
@@ -1023,7 +1050,14 @@ serviceMaps:
             created_by = EXCLUDED.created_by,
             last_modified_by = EXCLUDED.last_modified_by,
             created_time = EXCLUDED.created_time,
-            last_modified_time = EXCLUDED.last_modified_time;
+            last_modified_time = EXCLUDED.last_modified_time,
+            firstName = EXCLUDED.firstName,
+            middleName = EXCLUDED.middleName,
+            lastName = EXCLUDED.lastName,
+            fullName = EXCLUDED.fullName,
+            mobileNumber = EXCLUDED.mobileNumber,
+            age = EXCLUDED.age,
+            address = EXCLUDED.address;
           basePath: poaHolders.*
           jsonMaps:
             - jsonPath: $.poaHolders.*.id
@@ -1044,6 +1078,15 @@ serviceMaps:
             - jsonPath: $.poaHolders.*.auditDetails.lastModifiedBy
             - jsonPath: $.poaHolders.*.auditDetails.createdTime
             - jsonPath: $.poaHolders.*.auditDetails.lastModifiedTime
+            - jsonPath: $.cases.poaHolders.*.firstName
+            - jsonPath: $.cases.poaHolders.*.middleName
+            - jsonPath: $.cases.poaHolders.*.lastName
+            - jsonPath: $.cases.poaHolders.*.fullName
+            - jsonPath: $.cases.poaHolders.*.mobileNumber
+            - jsonPath: $.cases.poaHolders.*.age
+            - jsonPath: $.cases.poaHolders.*.address
+              type: JSON
+              dbType: JSONB
 
         - query:
             INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, poaholder_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) do update set
