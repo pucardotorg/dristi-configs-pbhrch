@@ -232,7 +232,7 @@ serviceMaps:
               type: JSON
               dbType: JSONB
 
-        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        - query: INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,first_name,middle_name,last_name,full_name,mobile_number,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
           basePath: cases.poaHolders.*
           jsonMaps:
             - jsonPath: $.cases.poaHolders.*.id
@@ -253,6 +253,15 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedBy
             - jsonPath: $.cases.poaHolders.*.auditDetails.createdTime
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedTime
+            - jsonPath: $.cases.poaHolders.*.firstName
+            - jsonPath: $.cases.poaHolders.*.middleName
+            - jsonPath: $.cases.poaHolders.*.lastName
+            - jsonPath: $.cases.poaHolders.*.fullName
+            - jsonPath: $.cases.poaHolders.*.mobileNumber
+            - jsonPath: $.cases.poaHolders.*.age
+            - jsonPath: $.cases.poaHolders.*.address
+              type: JSON
+              dbType: JSONB
 
         - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType, isActive,poaholder_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?);
           basePath: cases.poaHolders.*.documents.*
@@ -267,276 +276,8 @@ serviceMaps:
               type: JSON
               dbType: JSONB
 
-        - query: INSERT INTO dristi_advocate_office_case_member (id, tenant_id, office_advocate_id, office_advocate_user_uuid, office_advocate_name, case_id, member_id, member_user_uuid, member_type, member_name, is_active, created_by, last_modified_by, created_time, last_modified_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (case_id, member_id, office_advocate_id) DO UPDATE SET is_active = EXCLUDED.is_active, last_modified_by = EXCLUDED.last_modified_by, last_modified_time = EXCLUDED.last_modified_time, office_advocate_user_uuid = EXCLUDED.office_advocate_user_uuid, member_user_uuid = EXCLUDED.member_user_uuid;
-          basePath: cases.advocateOffices.*.advocates.*
-          jsonMaps:
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.id
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.tenantId
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.advocates[*].id)].officeAdvocateId
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.advocates[*].id)].officeAdvocateUserUuid
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.advocates[*].id)].officeAdvocateName
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.caseId
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.memberId
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.memberUserUuid
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.memberType
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.memberName
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.isActive
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.auditDetails.createdBy
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.auditDetails.createdTime
-            - jsonPath: $.cases.advocateOffices.*.advocates.*.auditDetails.lastModifiedTime
-
-        - query: INSERT INTO dristi_advocate_office_case_member (id, tenant_id, office_advocate_id, office_advocate_user_uuid, office_advocate_name, case_id, member_id, member_user_uuid, member_type, member_name, is_active, created_by, last_modified_by, created_time, last_modified_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (case_id, member_id, office_advocate_id) DO UPDATE SET is_active = EXCLUDED.is_active, last_modified_by = EXCLUDED.last_modified_by, last_modified_time = EXCLUDED.last_modified_time, office_advocate_user_uuid = EXCLUDED.office_advocate_user_uuid, member_user_uuid = EXCLUDED.member_user_uuid;
-          basePath: cases.advocateOffices.*.clerks.*
-          jsonMaps:
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.id
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.tenantId
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.clerks[*].id)].officeAdvocateId
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.clerks[*].id)].officeAdvocateUserUuid
-            - jsonPath: $.cases.advocateOffices[*][?({id} in @.clerks[*].id)].officeAdvocateName
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.caseId
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.memberId
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.memberUserUuid
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.memberType
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.memberName
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.isActive
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.auditDetails.createdBy
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.auditDetails.createdTime
-            - jsonPath: $.cases.advocateOffices.*.clerks.*.auditDetails.lastModifiedTime
-
-    - version: 1.0
-      description: Update case details in tables
-      fromTopic: update-case-application
-      isTransaction: true
-      isAuditEnabled: true
-      module: CASE
-      objecIdJsonPath: $.id
-      tenantIdJsonPath: $.tenantId
-      transactionCodeJsonPath: $.filingNumber
-      auditAttributeBasePath: cases
-      queryMaps:
-        - query: UPDATE dristi_cases SET tenantid=?,resolutionmechanism=?,casetitle=?,casedescription=?,filingnumber=?,casetype=?,casenumber=?,cnrnumber=?,cmpNumber=?,courtcasenumber=?,accesscode=?, advocatecount=?, isactive=?,courtid=?,benchid=?,judgeid=?,filingdate=?,judgementdate=?,registrationdate=?,casecategory=?,natureofpleading=?,status=?,remarks=?,casedetails=?,additionaldetails=?,lastmodifiedby=?,lastModifiedtime=?,witnessDetails=? WHERE id=?;
-          basePath: cases
-          jsonMaps:
-            - jsonPath: $.cases.tenantId
-            - jsonPath: $.cases.resolutionMechanism
-            - jsonPath: $.cases.caseTitle
-            - jsonPath: $.cases.caseDescription
-            - jsonPath: $.cases.filingNumber
-            - jsonPath: $.cases.caseType
-            - jsonPath: $.cases.caseNumber
-            - jsonPath: $.cases.cnrNumber
-            - jsonPath: $.cases.cmpNumber
-            - jsonPath: $.cases.courtCaseNumber
-            - jsonPath: $.cases.accessCode
-            - jsonPath: $.cases.advocateCount
-            - jsonPath: $.cases.isActive
-            - jsonPath: $.cases.courtId
-            - jsonPath: $.cases.benchId
-            - jsonPath: $.cases.judgeId
-            - jsonPath: $.cases.filingDate
-            - jsonPath: $.cases.judgementDate
-            - jsonPath: $.cases.registrationDate
-            - jsonPath: $.cases.caseCategory
-            - jsonPath: $.cases.natureOfPleading
-            - jsonPath: $.cases.status
-            - jsonPath: $.cases.remarks
-            - jsonPath: $.cases.caseDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.auditDetails.lastModifiedTime
-            - jsonPath: $.cases.witnessDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.id
-
-        - query: INSERT INTO dristi_linked_case (id, relationshiptype, casenumbers, isactive, case_id, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET relationshiptype = EXCLUDED.relationshiptype, casenumbers = EXCLUDED.casenumbers, isactive = EXCLUDED.isactive, case_id = EXCLUDED.case_id, additionaldetails = EXCLUDED.additionaldetails, lastmodifiedby = EXCLUDED.lastmodifiedby, lastmodifiedtime = EXCLUDED.lastmodifiedtime;
-          basePath: cases.linkedCases.*
-          jsonMaps:
-            - jsonPath: $.cases.linkedCases.*.id
-            - jsonPath: $.cases.linkedCases.*.relationshipType
-            - jsonPath: $.cases.linkedCases.*.caseNumber
-            - jsonPath: $.cases.linkedCases.*.isActive
-            - jsonPath: $.cases.id
-            - jsonPath: $.cases.linkedCases.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.linkedCases.*.auditDetails.createdBy
-            - jsonPath: $.cases.linkedCases.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.linkedCases.*.auditDetails.createdTime
-            - jsonPath: $.cases.linkedCases.*.auditDetails.lastModifiedTime
-
-        - query: INSERT INTO dristi_case_statutes_and_sections (id, tenantid, statutes, sections, subsections, case_id, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET statutes = EXCLUDED.statutes, sections = EXCLUDED.sections, subsections = EXCLUDED.subsections, case_id = EXCLUDED.case_id, additionaldetails = EXCLUDED.additionaldetails, lastmodifiedby = EXCLUDED.lastmodifiedby, lastmodifiedtime = EXCLUDED.lastmodifiedtime;
-          basePath: cases.statutesAndSections.*
-          jsonMaps:
-            - jsonPath: $.cases.statutesAndSections.*.id
-            - jsonPath: $.cases.statutesAndSections.*.tenantId
-            - jsonPath: $.cases.statutesAndSections.*.statute
-            - jsonPath: $.cases.statutesAndSections.*.strSections
-            - jsonPath: $.cases.statutesAndSections.*.strSubsections
-            - jsonPath: $.cases.id
-            - jsonPath: $.cases.statutesAndSections.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.statutesAndSections.*.auditDetails.createdBy
-            - jsonPath: $.cases.statutesAndSections.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.statutesAndSections.*.auditDetails.createdTime
-            - jsonPath: $.cases.statutesAndSections.*.auditDetails.lastModifiedTime
-
-        - query: INSERT INTO public.dristi_case_litigants (id, tenantid, partycategory, individualid, organisationid, partytype, isactive, case_id, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime, hassigned, isresponserequired, first_name, middle_name, last_name, full_name, mobile_number, email, age, company_name, designation, litigant_type, litigant_type_of_entity, transferred_poa, permanent_address, current_address, is_same_address, is_joined, address_details, party_type_detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET partycategory = EXCLUDED.partycategory, individualid = EXCLUDED.individualid, organisationid = EXCLUDED.organisationid, case_id = EXCLUDED.case_id, partytype = EXCLUDED.partytype, isactive = EXCLUDED.isactive, additionaldetails = EXCLUDED.additionaldetails, lastmodifiedby = EXCLUDED.lastmodifiedby, lastmodifiedtime = EXCLUDED.lastmodifiedtime, hassigned = EXCLUDED.hassigned, isresponserequired = EXCLUDED.isresponserequired, first_name = EXCLUDED.first_name, middle_name = EXCLUDED.middle_name, last_name = EXCLUDED.last_name, full_name = EXCLUDED.full_name, mobile_number = EXCLUDED.mobile_number, email = EXCLUDED.email, age = EXCLUDED.age, company_name = EXCLUDED.company_name, designation = EXCLUDED.designation, litigant_type = EXCLUDED.litigant_type, litigant_type_of_entity = EXCLUDED.litigant_type_of_entity, transferred_poa = EXCLUDED.transferred_poa, permanent_address = EXCLUDED.permanent_address, current_address = EXCLUDED.current_address, is_same_address = EXCLUDED.is_same_address, is_joined = EXCLUDED.is_joined, address_details = EXCLUDED.address_details, party_type_detail = EXCLUDED.party_type_detail;
-          basePath: cases.litigants.*
-          jsonMaps:
-            - jsonPath: $.cases.litigants.*.id
-            - jsonPath: $.cases.litigants.*.tenantId
-            - jsonPath: $.cases.litigants.*.partyCategory
-            - jsonPath: $.cases.litigants.*.individualId
-            - jsonPath: $.cases.litigants.*.organisationID
-            - jsonPath: $.cases.litigants.*.partyType
-            - jsonPath: $.cases.litigants.*.isActive
-            - jsonPath: $.cases.id
-            - jsonPath: $.cases.litigants.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.auditDetails.createdBy
-            - jsonPath: $.cases.litigants.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.litigants.*.auditDetails.createdTime
-            - jsonPath: $.cases.litigants.*.auditDetails.lastModifiedTime
-            - jsonPath: $.cases.litigants.*.hasSigned
-            - jsonPath: $.cases.litigants.*.isResponseRequired
-            - jsonPath: $.cases.litigants.*.firstName
-            - jsonPath: $.cases.litigants.*.middleName
-            - jsonPath: $.cases.litigants.*.lastName
-            - jsonPath: $.cases.litigants.*.fullName
-            - jsonPath: $.cases.litigants.*.mobileNumber
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.email
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.age
-            - jsonPath: $.cases.litigants.*.companyName
-            - jsonPath: $.cases.litigants.*.designation
-            - jsonPath: $.cases.litigants.*.litigantType
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.litigantTypeOfEntity
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.transferredPOA
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.permanentAddress
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.currentAddress
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.isSameAddress
-            - jsonPath: $.cases.litigants.*.isJoined
-            - jsonPath: $.cases.litigants.*.addressDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.litigants.*.partyTypeDetail
-              type: JSON
-              dbType: JSONB
-
-        - query: INSERT INTO public.dristi_case_representatives (id, tenantid, advocateid, isactive, case_id, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime, hassigned, advocate_filing_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET tenantid = EXCLUDED.tenantid, advocateid = EXCLUDED.advocateid, isactive = EXCLUDED.isactive, case_id = EXCLUDED.case_id, additionaldetails = EXCLUDED.additionaldetails, lastmodifiedby = EXCLUDED.lastmodifiedby, lastmodifiedtime = EXCLUDED.lastmodifiedtime, hassigned = EXCLUDED.hassigned, advocate_filing_status = EXCLUDED.advocate_filing_status;
-          basePath: cases.representatives.*
-          jsonMaps:
-            - jsonPath: $.cases.representatives.*.id
-            - jsonPath: $.cases.representatives.*.tenantId
-            - jsonPath: $.cases.representatives.*.advocateId
-            - jsonPath: $.cases.representatives.*.isActive
-            - jsonPath: $.cases.id
-            - jsonPath: $.cases.representatives.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.representatives.*.auditDetails.createdBy
-            - jsonPath: $.cases.representatives.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.representatives.*.auditDetails.createdTime
-            - jsonPath: $.cases.representatives.*.auditDetails.lastModifiedTime
-            - jsonPath: $.cases.representatives.*.hasSigned
-            - jsonPath: $.cases.representatives.*.advocateFilingStatus
-
-        - query: INSERT INTO dristi_case_representing (id, tenantid, partycategory, individualid, organisationid, case_id, partytype, isactive, representative_id, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET partycategory = EXCLUDED.partycategory, individualid = EXCLUDED.individualid, organisationid = EXCLUDED.organisationid, case_id = EXCLUDED.case_id, partytype = EXCLUDED.partytype, isactive = EXCLUDED.isactive, representative_id = EXCLUDED.representative_id, additionaldetails = EXCLUDED.additionaldetails, lastmodifiedby = EXCLUDED.lastmodifiedby, lastmodifiedtime = EXCLUDED.lastmodifiedtime;
-          basePath: cases.representatives.*.representing.*
-          jsonMaps:
-            - jsonPath: $.cases.representatives.*.representing.*.id
-            - jsonPath: $.cases.representatives.*.representing.*.tenantId
-            - jsonPath: $.cases.representatives.*.representing.*.partyCategory
-            - jsonPath: $.cases.representatives.*.representing.*.individualId
-            - jsonPath: $.cases.representatives.*.representing.*.organisationID
-            - jsonPath: $.cases.representatives.*.representing.*.caseId
-            - jsonPath: $.cases.representatives.*.representing.*.partyType
-            - jsonPath: $.cases.representatives.*.representing.*.isActive
-            - jsonPath: $.cases.representatives[*][?({id} in @.representing[*].id)].id
-            - jsonPath: $.cases.representatives.*.representing.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-            - jsonPath: $.cases.representatives.*.representing.*.auditDetails.createdBy
-            - jsonPath: $.cases.representatives.*.representing.*.auditDetails.lastModifiedBy
-            - jsonPath: $.cases.representatives.*.representing.*.auditDetails.createdTime
-            - jsonPath: $.cases.representatives.*.representing.*.auditDetails.lastModifiedTime
-
-        - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive,case_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET fileStore = EXCLUDED.fileStore, documentUid = EXCLUDED.documentUid, documentType = EXCLUDED.documentType, isActive=EXCLUDED.isActive, case_id = EXCLUDED.case_id, additionalDetails = EXCLUDED.additionalDetails;
-          basePath: cases.documents.*
-          jsonMaps:
-            - jsonPath: $.cases.documents.*.id
-            - jsonPath: $.cases.documents.*.fileStore
-            - jsonPath: $.cases.documents.*.documentUid
-            - jsonPath: $.cases.documents.*.documentType
-            - jsonPath: $.cases.documents.*.isActive
-            - jsonPath: $.cases.id
-            - jsonPath: $.cases.documents.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-
-        - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, litigant_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET fileStore = EXCLUDED.fileStore, documentUid = EXCLUDED.documentUid, documentType = EXCLUDED.documentType, isActive=EXCLUDED.isActive, litigant_id = EXCLUDED.litigant_id, additionalDetails = EXCLUDED.additionalDetails;
-          basePath: cases.litigants.*.documents.*
-          jsonMaps:
-            - jsonPath: $.cases.litigants.*.documents.*.id
-            - jsonPath: $.cases.litigants.*.documents.*.fileStore
-            - jsonPath: $.cases.litigants.*.documents.*.documentUid
-            - jsonPath: $.cases.litigants.*.documents.*.documentType
-            - jsonPath: $.cases.litigants.*.documents.*.isActive
-            - jsonPath: $.cases.litigants[*][?({id} in @.documents[*].id)].id
-            - jsonPath: $.cases.litigants.*.documents.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-
-        - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, representative_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET fileStore = EXCLUDED.fileStore, documentUid = EXCLUDED.documentUid, documentType = EXCLUDED.documentType, isActive=EXCLUDED.isActive, representative_id = EXCLUDED.representative_id, additionalDetails = EXCLUDED.additionalDetails;
-          basePath: cases.representatives.*.documents.*
-          jsonMaps:
-            - jsonPath: $.cases.representatives.*.documents.*.id
-            - jsonPath: $.cases.representatives.*.documents.*.fileStore
-            - jsonPath: $.cases.representatives.*.documents.*.documentUid
-            - jsonPath: $.cases.representatives.*.documents.*.documentType
-            - jsonPath: $.cases.representatives.*.documents.*.isActive
-            - jsonPath: $.cases.representatives[*][?({id} in @.documents[*].id)].id
-            - jsonPath: $.cases.representatives.*.documents.additionalDetails
-              type: JSON
-              dbType: JSONB
-
-        - query: INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, representing_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET fileStore = EXCLUDED.fileStore, documentUid = EXCLUDED.documentUid, documentType = EXCLUDED.documentType, isActive=EXCLUDED.isActive, representing_id = EXCLUDED.representing_id, additionalDetails = EXCLUDED.additionalDetails;
-          basePath: cases.representatives.*.representing.*.documents.*
-          jsonMaps:
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.id
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.fileStore
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.documentUid
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.documentType
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.isActive
-            - jsonPath: $.cases.representatives.*.representing[*][?({id} in @.documents[*].id)].id
-            - jsonPath: $.cases.representatives.*.representing.*.documents.*.additionalDetails
-              type: JSON
-              dbType: JSONB
-
         - query:
-            INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) do update set
+            INSERT INTO dristi_case_poaholders(id,tenant_id,case_id,individual_id,poa_type,name,is_active,additional_details,hasSigned,representing_litigants,created_by,last_modified_by,created_time,last_modified_time,first_name,middle_name,last_name,full_name,mobile_number,age,address) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) do update set
             tenant_id = EXCLUDED.tenant_id,
             case_id = EXCLUDED.case_id,
             individual_id = EXCLUDED.individual_id,
@@ -549,7 +290,14 @@ serviceMaps:
             created_by = EXCLUDED.created_by,
             last_modified_by = EXCLUDED.last_modified_by,
             created_time = EXCLUDED.created_time,
-            last_modified_time = EXCLUDED.last_modified_time;
+            last_modified_time = EXCLUDED.last_modified_time,
+            first_name = EXCLUDED.first_name,
+            middle_name = EXCLUDED.middle_name,
+            last_name = EXCLUDED.last_name,
+            full_name = EXCLUDED.full_name,
+            mobile_number = EXCLUDED.mobile_number,
+            age = EXCLUDED.age,
+            address = EXCLUDED.address;
           basePath: cases.poaHolders.*
           jsonMaps:
             - jsonPath: $.cases.poaHolders.*.id
@@ -570,6 +318,15 @@ serviceMaps:
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedBy
             - jsonPath: $.cases.poaHolders.*.auditDetails.createdTime
             - jsonPath: $.cases.poaHolders.*.auditDetails.lastModifiedTime
+            - jsonPath: $.cases.poaHolders.*.firstName
+            - jsonPath: $.cases.poaHolders.*.middleName
+            - jsonPath: $.cases.poaHolders.*.lastName
+            - jsonPath: $.cases.poaHolders.*.fullName
+            - jsonPath: $.cases.poaHolders.*.mobileNumber
+            - jsonPath: $.cases.poaHolders.*.age
+            - jsonPath: $.cases.poaHolders.*.address
+              type: JSON
+              dbType: JSONB
 
         - query:
             INSERT INTO dristi_case_document(id,fileStore,documentUid,documentType,isActive, poaholder_id, additionalDetails) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) do update set
