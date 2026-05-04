@@ -10,7 +10,7 @@ ENV_URLS = {
     "demo": "https://demo.pucar.org",
     "prod": "https://oncourts.kerala.gov.in",
 }
-LOCALIZATION_SEARCH_API = "/localization/messages/v1/_search?&tenantId=kl&locale="
+LOCALIZATION_SEARCH_API = "/localization/messages/v1/_search?&tenantId={tenant_id}&locale="
 
 # Neglect lists if you want to neglect code or by module add in below arrays
 NEGLECT_CODES = ["MOBILE_VIEW_ERROR ", "MOVE_CASE_OUT_OF_LONG_PENDING_REGISTER ", "MOVE_CASE_TO_LONG_PENDING_REGISTER ","JUDGEMENT_NOT_ALLOWED_FOR_LPR_CASE","Close", "Review Process", "SEARCH_CASE_NAME_OR_NUMBER", "Code",]
@@ -40,18 +40,19 @@ logging.basicConfig(
 )
 
 
-def get_localization_data(url, locale):
+def get_localization_data(url, locale, tenant_id):
     """
     Fetches localization data from the given URL and locale.
 
     :param url: API URL to fetch localization data from
     :param locale: Locale to fetch data for
+    :param tenant_id: Tenant ID to use in the API request
     :return: JSON response containing localization messages
     """
     try:
         payload["RequestInfo"]["msgId"] = f"1716217310250|{locale}"
         response = requests.post(
-            url + LOCALIZATION_SEARCH_API + locale,
+            url + LOCALIZATION_SEARCH_API.format(tenant_id=tenant_id) + locale,
             json=payload,
             headers=HEADERS,
             verify=False,
@@ -114,8 +115,8 @@ def process_localizations(locale):
     try:
         logging.info(f"Comparing localization for locale: {locale}")
 
-        source_response = get_localization_data(SOURCE_URL, locale)
-        target_response = get_localization_data(TARGET_URL, locale)
+        source_response = get_localization_data(SOURCE_URL, locale, SOURCE_TENANT_ID)
+        target_response = get_localization_data(TARGET_URL, locale, TARGET_TENANT_ID)
 
         # Ensure both source and target responses are not None
         if source_response and target_response:
@@ -147,13 +148,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare localization between two environments")
     parser.add_argument("--source", required=True, choices=ENV_URLS.keys(), help="Source environment (dev, qa, demo, prod)")
     parser.add_argument("--target", required=True, choices=ENV_URLS.keys(), help="Target environment (dev, qa, demo, prod)")
+    parser.add_argument("--source-tenant", default="pb", help="Tenant ID for source environment (default: pb)")
+    parser.add_argument("--target-tenant", default="pb", help="Tenant ID for target environment (default: pb)")
     args = parser.parse_args()
 
     SOURCE_URL = ENV_URLS[args.source]
     TARGET_URL = ENV_URLS[args.target]
+    SOURCE_TENANT_ID = args.source_tenant
+    TARGET_TENANT_ID = args.target_tenant
 
-    logging.info(f"Source: {args.source} ({SOURCE_URL})")
-    logging.info(f"Target: {args.target} ({TARGET_URL})")
+    logging.info(f"Source: {args.source} ({SOURCE_URL}), TenantId: {SOURCE_TENANT_ID}")
+    logging.info(f"Target: {args.target} ({TARGET_URL}), TenantId: {TARGET_TENANT_ID}")
 
     for locale in LOCALES:
         process_localizations(locale)

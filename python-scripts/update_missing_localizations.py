@@ -15,16 +15,16 @@ env_list = [
     #     "password": "Beehyv@123",
     #     "username": "mdmsv2Super",
     # },
-    {
-        "url": "dristi-kerala-qa.pucar.org",
-        "password": "Beehyv@123",
-        "username": "mdmsv2Qa",
-    },
     # {
-    #     "url": "demo.pucar.org",
+    #     "url": "dristi-kerala-qa.pucar.org",
     #     "password": "Beehyv@123",
-    #     "username": "mdmsv2Demo",
+    #     "username": "mdmsv2Qa",
     # },
+    {
+        "url": "demo.pucar.org",
+        "password": "Beehyv@123",
+        "username": "mdmsv2Demo",
+    },
     # {
     #     "url": "oncourts.kerala.gov.in",
     #     "password": "oN24*7@56",
@@ -57,7 +57,7 @@ def get_auth_token(env):
     url = f"https://{env['url']}/user/oauth/token"
     data = {
         "userType": "EMPLOYEE",
-        "tenantId": "kl",
+        "tenantId": "pb",
         "scope": "read",
         "grant_type": "password",
         "username": env["username"],
@@ -109,7 +109,7 @@ def process_file(file_module, env):
                 if row[0] and msg:
                     loc_data = {
                         "RequestInfo": {"authToken": env["token"]},
-                        "tenantId": "kl",
+                        "tenantId": "pb",
                         "messages": [
                             {
                                 "code": row[0],

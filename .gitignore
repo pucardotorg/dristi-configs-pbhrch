@@ -1,1 +1,8 @@
 **/.idea/
+
+# Localization agent
+agent/.env
+agent/*.csv
+agent/__pycache__/
+**/__pycache__/
+*.pyc
